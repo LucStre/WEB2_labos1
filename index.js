@@ -3,7 +3,11 @@ const path = require('path')
 const app = express()
 const port = process.env.PORT || 3000
 
+const previousUsers = [];
+
 app.use(express.static(path.join(__dirname, 'public')));
+//app to understand incoming data as JSON
+app.use(express.json());
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
@@ -40,6 +44,18 @@ app.get('/', (req, res) => {
 
 app.get('/profile', requiresAuth(), (req, res) => {
   res.send(JSON.stringify(req.oidc.user));
+});
+
+app.post('/api', (request, response) => {
+  const data = request.body;
+  previousUsers.push(data);
+  response.json(previousUsers);
+  //console.log(previousUsers);
+});
+
+app.get('/api', (request, response) => {
+  //(console.log(previousUsers)
+  response.send(previousUsers);
 });
 
 app.listen(port, () => {

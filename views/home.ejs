@@ -50,6 +50,21 @@
     const tiles = L.tileLayer(tileUrl, { atribution });
     tiles.addTo(mymap);
     var popup = L.popup();
+    showPrevious();
+
+    async function showPrevious() {
+      const response = await fetch('/api', { method: 'GET' }).then(response => response.json());
+      //console.log(response)
+      let num = 0;
+      if (response.length > 5) {
+        num = response.length - 5;
+      }
+      for (let i = num; i < response.length; i++) {
+        var marker = L.marker([response[i].latitude, response[i].longitude]).addTo(mymap);
+        marker.bindPopup(('User: ' + response[i].username + '\nTime: ' + response[i].ts).toString()).openPopup();
+      }
+    }
+
     function geoFindMe() {
 
       const status = document.querySelector('#status');
@@ -67,6 +82,15 @@
         marker.bindPopup(('User: ' + username + '\nTime: ' + ts).toString()).openPopup();
         status.textContent = 'Location: ' + latitude + ', ' + longitude + '\nTime: ' + ts;
 
+        const data = { username, ts, latitude, longitude }
+        const options = {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        }
+        fetch('/api', options);
       }
 
       function error() {
